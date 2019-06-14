@@ -3,6 +3,9 @@
 
 description="Provides EC2 cloud bootstrap"
 
+# override in /etc/conf.d/tiny-ec2-bootstrap
+EC2_USER=${EC2_USER:-alpine}
+
 depend() {
     need net
     provide cloud-final
@@ -67,10 +70,10 @@ start() {
     [ -d "/var/lib/cloud" ] || mkdir -p /var/lib/cloud
 
     ebegin "Disabling root password"; _disable_password root; eend $?
-    ebegin "Disabling alpine password"; _disable_password alpine; eend $?
+    ebegin "Disabling $EC2_USER password"; _disable_password "$EC2_USER"; eend $?
     ebegin "Resizing root partition"; _resize_root_partition; eend $?
     ebegin "Setting ec2 hostname"; _update_hostname; eend $?
-    ebegin "Setting ec2 user ssh keys"; _set_ssh_keys "alpine"; eend $?
+    ebegin "Setting ec2 user ssh keys"; _set_ssh_keys "$EC2_USER"; eend $?
     ebegin "Running ec2 user data script"; _run_userdata; eend $?
 
     touch "/var/lib/cloud/.bootstrap-complete"
